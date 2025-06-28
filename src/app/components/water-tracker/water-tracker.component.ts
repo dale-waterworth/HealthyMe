@@ -44,14 +44,13 @@ export class WaterTrackerComponent implements OnInit {
 
   async loadUserProfile() {
     try {
+      // Add a small delay to ensure IndexedDB is fully initialized
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const profiles = await this.dbService.getAllUserProfiles();
-      console.log('Loaded profiles:', profiles);
       if (profiles.length > 0) {
         this.currentUser = profiles[0];
         this.dailyGoal = this.currentUser.dailyWaterGoal;
-        console.log('Current user set:', this.currentUser);
-      } else {
-        console.log('No user profiles found');
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
