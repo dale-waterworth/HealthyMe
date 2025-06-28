@@ -1,0 +1,171 @@
+<div class="settings">
+  <div class="settings-container">
+    <!-- Header -->
+    <div class="header-section">
+      <h1>Settings</h1>
+      <p class="subtitle">Configure your hydration reminders and notifications</p>
+    </div>
+
+    <!-- No Profile Warning -->
+    <div class="no-profile-warning" *ngIf="!currentUser">
+      <div class="warning-content">
+        <h3>🎯 Profile Required</h3>
+        <p>Please set up your profile first to configure reminder settings.</p>
+        <a routerLink="/calculator" class="setup-btn">Calculate My Hydration Needs</a>
+      </div>
+    </div>
+
+    <!-- Settings Form -->
+    <div class="settings-form" *ngIf="currentUser">
+      <!-- Reminder Toggle -->
+      <div class="setting-section">
+        <h3>Hydration Reminders</h3>
+        <div class="setting-item">
+          <label class="toggle-switch">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="reminderEnabled"
+              (change)="saveReminderSettings()">
+            <span class="toggle-slider"></span>
+          </label>
+          <div class="setting-info">
+            <span class="setting-label">
+              {{ reminderEnabled ? 'Reminders Enabled' : 'Reminders Disabled' }}
+            </span>
+            <small class="setting-description">
+              {{ reminderEnabled ? 'You will receive hydration reminders' : 'No reminders will be sent' }}
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reminder Interval -->
+      <div class="setting-section" *ngIf="reminderEnabled">
+        <h3>Reminder Frequency</h3>
+        <div class="interval-options">
+          <div 
+            *ngFor="let option of intervalOptions" 
+            class="interval-option"
+            [class.selected]="intervalType === option.value">
+            <label class="interval-label">
+              <input 
+                type="radio" 
+                name="intervalType"
+                [value]="option.value"
+                [(ngModel)]="intervalType"
+                (change)="saveReminderSettings()">
+              <div class="interval-content">
+                <span class="interval-title">{{ option.label }}</span>
+                <small class="interval-description">{{ option.description }}</small>
+              </div>
+            </label>
+          </div>
+        </div>
+        <div class="current-selection">
+          <strong>Selected:</strong> {{ getIntervalDescription() }}
+        </div>
+      </div>
+
+      <!-- Notification Hours -->
+      <div class="setting-section" *ngIf="reminderEnabled">
+        <h3>Notification Hours</h3>
+        <p class="section-description">
+          Set the time range when you want to receive reminders. No notifications will be sent outside these hours.
+        </p>
+        
+        <div class="time-range-selector">
+          <div class="time-input">
+            <label for="startHour">Start Time</label>
+            <select 
+              id="startHour"
+              [(ngModel)]="startHour"
+              (change)="saveReminderSettings()"
+              class="time-select">
+              <option *ngFor="let hour of hourOptions" [value]="hour.value">
+                {{ hour.label }}
+              </option>
+            </select>
+          </div>
+          
+          <div class="time-separator">to</div>
+          
+          <div class="time-input">
+            <label for="endHour">End Time</label>
+            <select 
+              id="endHour"
+              [(ngModel)]="endHour"
+              (change)="saveReminderSettings()"
+              class="time-select">
+              <option *ngFor="let hour of hourOptions" [value]="hour.value">
+                {{ hour.label }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="time-range-preview">
+          <strong>Active Hours:</strong> {{ getNotificationTimeRange() }}
+        </div>
+      </div>
+
+      <!-- Smart Reminders Info -->
+      <div class="setting-section" *ngIf="reminderEnabled">
+        <h3>Smart Reminders</h3>
+        <div class="info-box">
+          <div class="info-content">
+            <h4>🧠 How Smart Reminders Work</h4>
+            <ul>
+              <li>If you drink more than expected, the next reminder will be delayed</li>
+              <li>Reminders adjust based on your recent water intake</li>
+              <li>No reminders outside your set notification hours</li>
+              <li>Frequency depends on your daily hydration goal</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Current Status -->
+      <div class="setting-section" *ngIf="reminderSettings">
+        <h3>Current Status</h3>
+        <div class="status-grid">
+          <div class="status-item">
+            <span class="status-label">Status</span>
+            <span class="status-value" [class.enabled]="reminderEnabled" [class.disabled]="!reminderEnabled">
+              {{ reminderEnabled ? 'Active' : 'Disabled' }}
+            </span>
+          </div>
+          <div class="status-item" *ngIf="reminderEnabled">
+            <span class="status-label">Frequency</span>
+            <span class="status-value">{{ getCurrentIntervalLabel() }}</span>
+          </div>
+          <div class="status-item" *ngIf="reminderEnabled">
+            <span class="status-label">Active Hours</span>
+            <span class="status-value">{{ getNotificationTimeRange() }}</span>
+          </div>
+          <div class="status-item" *ngIf="reminderEnabled && reminderSettings.lastReminder">
+            <span class="status-label">Last Reminder</span>
+            <span class="status-value">{{ reminderSettings.lastReminder | date:'short' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Test Section -->
+      <div class="setting-section">
+        <h3>Test Notifications</h3>
+        <p class="section-description">
+          Test if notifications are working properly on your device.
+        </p>
+        <button 
+          class="test-btn"
+          (click)="testNotification()">
+          Send Test Notification
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation-section">
+      <a routerLink="/tracker" class="nav-btn">← Back to Water Tracker</a>
+    </div>
+  </div>
+</div>

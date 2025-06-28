@@ -41,59 +41,15 @@ export class NotificationService {
     }
   }
 
+  // Note: Smart reminder scheduling is now handled by the settings component
+  // This method is kept for backwards compatibility but is deprecated
   async scheduleHydrationReminders(userId: number, intervalMinutes: number): Promise<boolean> {
     const hasPermission = await this.requestNotificationPermission();
-
-    if (!hasPermission) {
-      return false;
-    }
-
-    // Clear existing reminders
-    this.clearReminders();
-
-    // Save reminder settings to database
-    try {
-      const existingReminder = await this.dbService.getHydrationReminderByUser(userId);
-      const now = new Date();
-      const nextReminder = new Date(now.getTime() + intervalMinutes * 60000);
-
-      if (existingReminder) {
-        await this.dbService.updateHydrationReminder(existingReminder.id, {
-          isEnabled: true,
-          intervalMinutes,
-          lastReminder: now,
-          nextReminder
-        });
-      } else {
-        await this.dbService.saveHydrationReminder({
-          userId,
-          isEnabled: true,
-          intervalMinutes,
-          lastReminder: now,
-          nextReminder
-        });
-      }
-
-      // Start the reminder interval
-      this.startReminderInterval(intervalMinutes);
-
-      // Show confirmation notification
-      this.showNotification(
-        'Hydration Reminders Set!',
-        `You'll receive reminders every ${intervalMinutes} minutes to drink water.`,
-        { icon: '/icons/icon-192x192.png' }
-      );
-
-      return true;
-    } catch (error) {
-      return false;
-    }
+    return hasPermission;
   }
 
   private startReminderInterval(intervalMinutes: number): void {
-    this.reminderInterval = window.setInterval(() => {
-      this.showHydrationReminder();
-    }, intervalMinutes * 60000);
+    // This method is no longer used - smart reminders are handled by settings component
   }
 
   private showHydrationReminder(): void {
@@ -177,17 +133,8 @@ export class NotificationService {
   }
 
   async restoreRemindersOnLoad(userId: number): Promise<void> {
-    try {
-      const reminder = await this.dbService.getHydrationReminderByUser(userId);
-      if (reminder && reminder.isEnabled) {
-        const hasPermission = await this.requestNotificationPermission();
-        if (hasPermission) {
-          this.startReminderInterval(reminder.intervalMinutes);
-        }
-      }
-    } catch (error) {
-      // Silently handle error
-    }
+    // Smart reminders are now handled by the settings component
+    // This method is kept for backwards compatibility but does nothing
   }
 
   isNotificationSupported(): boolean {

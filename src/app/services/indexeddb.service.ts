@@ -23,9 +23,13 @@ export interface HydrationReminder {
   id: number;
   userId: number;
   isEnabled: boolean;
-  intervalMinutes: number;
+  intervalType: 'half-hour' | 'hourly' | 'four-hour'; // New configurable intervals
+  startHour: number; // Start of notification window (0-23, default 8)
+  endHour: number; // End of notification window (0-23, default 18)
   lastReminder: Date;
   nextReminder: Date;
+  lastIntakeAmount: number; // Track last intake to calculate smart reminders
+  lastIntakeTime: Date; // When the last intake was logged
 }
 
 @Injectable({
@@ -34,7 +38,7 @@ export interface HydrationReminder {
 export class IndexedDBService {
   private db: IDBDatabase | null = null;
   private readonly dbName = 'HealthyMeDB';
-  private readonly dbVersion = 1;
+  private readonly dbVersion = 2;
 
   constructor() {
     this.initDatabase();

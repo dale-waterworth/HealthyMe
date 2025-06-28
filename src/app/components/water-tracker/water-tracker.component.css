@@ -477,3 +477,46 @@ input:checked + .toggle-slider:before {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* Settings Section */
+.settings-section {
+  margin-bottom: 30px;
+}
+
+.settings-section h3 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.settings-link-container {
+  background: #f8f9ff;
+  border: 2px solid #e3f2fd;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.settings-link {
+  display: inline-block;
+  background: #2196F3;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  margin-bottom: 10px;
+}
+
+.settings-link:hover {
+  background: #1976D2;
+}
+
+.settings-description {
+  color: #666;
+  margin: 10px 0 0 0;
+  font-size: 0.9rem;
+}

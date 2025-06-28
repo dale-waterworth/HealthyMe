@@ -26,9 +26,6 @@ export class WaterTrackerComponent implements OnInit {
   recentIntakes: WaterIntake[] = [];
   progressPercentage = 0;
   remainingAmount = 0;
-  isRemindersEnabled = false;
-  testMode = false;
-  testInterval = 1; // 1 minute default for testing
 
   constructor(
     private dbService: IndexedDBService,
@@ -41,11 +38,6 @@ export class WaterTrackerComponent implements OnInit {
     await this.loadTodayIntake();
     await this.loadRecentIntakes();
     this.calculateProgress();
-
-    if (this.currentUser) {
-      await this.notificationService.restoreRemindersOnLoad(this.currentUser.id);
-      await this.checkReminderStatus();
-    }
   }
 
   async loadUserProfile() {
@@ -149,55 +141,6 @@ export class WaterTrackerComponent implements OnInit {
     }
   }
 
-  async toggleReminders() {
-    if (!this.currentUser) {
-      console.error('No user profile found. Cannot toggle reminders.');
-      alert('Please set up your profile first by visiting the Calculator page.');
-      return;
-    }
-    
-    console.log('Current user:', this.currentUser);
-    console.log('Reminder interval:', this.currentUser.reminderInterval);
-    console.log('Before toggle - isRemindersEnabled:', this.isRemindersEnabled);
-    
-    try {
-      if (this.isRemindersEnabled) {
-        console.log('Disabling reminders...');
-        await this.notificationService.disableReminders(this.currentUser.id);
-        this.isRemindersEnabled = false;
-        console.log('Reminders disabled');
-      } else {
-        console.log('Enabling reminders...');
-        const intervalToUse = this.testMode ? this.testInterval : this.currentUser.reminderInterval;
-        console.log('Using interval:', intervalToUse);
-        const success = await this.notificationService.scheduleHydrationReminders(
-          this.currentUser.id,
-          intervalToUse
-        );
-        this.isRemindersEnabled = success;
-        console.log('Enable result:', success);
-      }
-      console.log('After toggle - isRemindersEnabled:', this.isRemindersEnabled);
-    } catch (error) {
-      console.error('Error toggling reminders:', error);
-    }
-  }
-
-  async checkReminderStatus() {
-    if (!this.currentUser) {
-      console.log('No user found in checkReminderStatus');
-      return;
-    }
-
-    try {
-      const reminder = await this.dbService.getHydrationReminderByUser(this.currentUser.id);
-      console.log('Loaded reminder:', reminder);
-      this.isRemindersEnabled = reminder ? reminder.isEnabled : false;
-      console.log('Set isRemindersEnabled to:', this.isRemindersEnabled);
-    } catch (error) {
-      console.error('Error checking reminder status:', error);
-    }
-  }
 
   checkAchievements() {
     if (this.progressPercentage >= 100 && this.progressPercentage < 105) {
@@ -243,59 +186,4 @@ export class WaterTrackerComponent implements OnInit {
     return this.notificationService.isNotificationSupported();
   }
 
-  async testNotification() {
-    await this.notificationService.testNotification();
-  }
-
-  async testDirectNotification() {
-    console.log('Testing direct notification (bypassing service)...');
-    
-    if (Notification.permission === 'granted') {
-      try {
-        const notification = new Notification('Direct Test', {
-          body: 'This is a direct browser notification test',
-          icon: '/icons/icon-192x192.png'
-        });
-        console.log('Direct notification created:', notification);
-        
-        setTimeout(() => notification.close(), 5000);
-      } catch (error) {
-        console.error('Direct notification error:', error);
-      }
-    } else {
-      console.error('Permission not granted for direct notification');
-    }
-  }
-
-  async requestPermissionAgain() {
-    console.log('Current permission:', Notification.permission);
-    
-    try {
-      const permission = await Notification.requestPermission();
-      console.log('New permission:', permission);
-      
-      if (permission === 'granted') {
-        alert('Permission granted! Try the test buttons now.');
-      } else {
-        alert('Permission denied. Check browser settings at chrome://settings/content/notifications');
-      }
-    } catch (error) {
-      console.error('Error requesting permission:', error);
-    }
-  }
-
-  onTestModeChange() {
-    console.log('Test mode changed to:', this.testMode);
-    
-    // If reminders are currently enabled, restart them with new interval
-    if (this.isRemindersEnabled && this.currentUser) {
-      console.log('Restarting reminders with new interval...');
-      this.toggleReminders().then(() => {
-        // Toggle off, then back on with new interval
-        setTimeout(() => {
-          this.toggleReminders();
-        }, 100);
-      });
-    }
-  }
 }

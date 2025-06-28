@@ -12,5 +12,9 @@ export const routes: Routes = [
   {
     path: 'tracker',
     loadComponent: () => import('./components/water-tracker/water-tracker.component').then(m => m.WaterTrackerComponent)
+  },
+  {
+    path: 'settings',
+    loadComponent: () => import('./components/settings/settings.component').then(m => m.SettingsComponent)
   }
 ];
