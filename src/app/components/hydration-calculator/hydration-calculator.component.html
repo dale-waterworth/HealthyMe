@@ -1,0 +1,157 @@
+<div class="hydration-calculator">
+  <div class="calculator-container">
+    <h1>Hydration Calculator</h1>
+    <p class="subtitle">Calculate your daily water intake needs based on NHS guidelines</p>
+
+    <form class="calculator-form" (ngSubmit)="calculateHydration()">
+      <div class="form-group">
+        <label for="age">Age (years)</label>
+        <input 
+          type="number" 
+          id="age" 
+          [(ngModel)]="factors.age" 
+          name="age"
+          min="1" 
+          max="120" 
+          required
+          class="form-input">
+        <small class="help-text">Age affects hydration needs due to metabolic changes</small>
+      </div>
+
+      <div class="form-group">
+        <label for="weight">Weight (kg)</label>
+        <input 
+          type="number" 
+          id="weight" 
+          [(ngModel)]="factors.weight" 
+          name="weight"
+          min="10" 
+          max="300" 
+          step="0.1"
+          required
+          class="form-input">
+        <small class="help-text">Base water needs are calculated per kg of body weight</small>
+      </div>
+
+      <div class="form-group">
+        <label for="activity">Activity Level</label>
+        <select 
+          id="activity" 
+          [(ngModel)]="factors.activityLevel" 
+          name="activity"
+          required
+          class="form-select">
+          <option value="low">Low Activity</option>
+          <option value="moderate">Moderate Activity</option>
+          <option value="high">High Activity</option>
+        </select>
+        <small class="help-text">{{ getActivityLevelDescription(factors.activityLevel) }}</small>
+      </div>
+
+      <div class="form-group">
+        <label for="climate">Climate Conditions (Optional)</label>
+        <select 
+          id="climate" 
+          [(ngModel)]="factors.climate" 
+          name="climate"
+          class="form-select">
+          <option value="normal">Normal</option>
+          <option value="hot">Hot Weather</option>
+          <option value="humid">Humid Conditions</option>
+        </select>
+        <small class="help-text">{{ getClimateDescription(factors.climate || 'normal') }}</small>
+      </div>
+
+      <div class="button-group">
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="isLoading">
+          <span *ngIf="!isLoading">Calculate My Hydration Needs</span>
+          <span *ngIf="isLoading">Calculating...</span>
+        </button>
+        
+        <button 
+          type="button" 
+          class="btn btn-secondary"
+          (click)="resetCalculator()">
+          Reset
+        </button>
+      </div>
+    </form>
+
+    <!-- Results Section -->
+    <div *ngIf="showResults && result" class="results-section">
+      <h2>Your Hydration Plan</h2>
+      
+      <div class="result-card main-result">
+        <div class="result-header">
+          <h3>Daily Water Goal</h3>
+          <div class="water-amount">{{ result.dailyWaterGoal }}ml</div>
+          <div class="water-glasses">≈ {{ result.recommendedGlasses }} glasses (250ml each)</div>
+        </div>
+      </div>
+
+      <div class="result-breakdown">
+        <h4>Calculation Breakdown</h4>
+        <div class="breakdown-item">
+          <span>Base requirement ({{ factors.weight }}kg × 35ml)</span>
+          <span>{{ result.baseRequirement }}ml</span>
+        </div>
+        <div class="breakdown-item" *ngIf="result.ageAdjustment > 0">
+          <span>Age adjustment</span>
+          <span>+{{ result.ageAdjustment }}ml</span>
+        </div>
+        <div class="breakdown-item" *ngIf="result.activityBonus > 0">
+          <span>Activity bonus</span>
+          <span>+{{ result.activityBonus }}ml</span>
+        </div>
+        <div class="breakdown-item" *ngIf="result.climateAdjustment > 0">
+          <span>Climate adjustment</span>
+          <span>+{{ result.climateAdjustment }}ml</span>
+        </div>
+      </div>
+
+      <!-- NHS Validation -->
+      <div class="nhs-validation" [class.warning]="!nhsValidation.isWithinRange">
+        <h4>NHS Guidelines Check</h4>
+        <p>{{ nhsValidation.recommendation }}</p>
+        <small>NHS recommends {{ nhsValidation.nhsMinimum }}ml - {{ nhsValidation.nhsMaximum }}ml daily</small>
+      </div>
+
+      <!-- Reminder Schedule -->
+      <div class="reminder-schedule">
+        <h4>Recommended Drinking Schedule</h4>
+        <p>Drink water every <strong>{{ result.recommendedInterval }} minutes</strong> during waking hours</p>
+        <small>This spreads your intake evenly throughout the day</small>
+      </div>
+
+      <!-- Personalized Tips -->
+      <div class="tips-section" *ngIf="tips.length > 0">
+        <h4>Personalized Tips</h4>
+        <ul class="tips-list">
+          <li *ngFor="let tip of tips">{{ tip }}</li>
+        </ul>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button 
+          class="btn btn-success"
+          (click)="saveProfile()">
+          Save My Profile & Start Tracking
+        </button>
+      </div>
+    </div>
+
+    <!-- NHS Reference -->
+    <div class="nhs-reference">
+      <p><small>
+        Based on NHS healthy hydration guidelines: 
+        <a href="https://www.kentcht.nhs.uk/leaflet/healthy-hydration" target="_blank" rel="noopener">
+          Kent Community Health NHS Trust
+        </a>
+      </small></p>
+    </div>
+  </div>
+</div>

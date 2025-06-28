@@ -1,0 +1,135 @@
+<div class="water-tracker">
+  <div class="tracker-container">
+    <!-- Header -->
+    <div class="header-section">
+      <h1>Water Tracker</h1>
+      <p class="subtitle">{{ getMotivationalMessage() }}</p>
+    </div>
+
+    <!-- Progress Section -->
+    <div class="progress-section">
+      <div class="progress-circle">
+        <div class="water-glass">
+          <div class="water-level" 
+               [style.height.%]="getWaterLevelHeight()"
+               [class]="getProgressBarClass()">
+          </div>
+          <div class="glass-text">
+            <div class="percentage">{{ progressPercentage }}%</div>
+            <div class="amount">{{ todayIntake }}ml</div>
+            <div class="goal">of {{ dailyGoal }}ml</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="progress-details">
+        <div class="detail-item">
+          <span class="label">Today's Progress</span>
+          <span class="value">{{ todayIntake }}ml / {{ dailyGoal }}ml</span>
+        </div>
+        <div class="detail-item" *ngIf="remainingAmount > 0">
+          <span class="label">Remaining</span>
+          <span class="value">{{ remainingAmount }}ml</span>
+        </div>
+        <div class="detail-item" *ngIf="remainingAmount === 0">
+          <span class="label">Goal Status</span>
+          <span class="value achieved">🎯 Goal Achieved!</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Log Section -->
+    <div class="quick-log-section">
+      <h3>Log Water Intake</h3>
+      
+      <div class="quick-amounts">
+        <button 
+          *ngFor="let amount of quickAmounts"
+          class="quick-btn"
+          (click)="logWaterIntake(amount)">
+          {{ amount }}ml
+        </button>
+      </div>
+
+      <div class="custom-amount">
+        <label for="customAmount">Custom Amount</label>
+        <div class="custom-input-group">
+          <input 
+            type="number" 
+            id="customAmount"
+            [(ngModel)]="customAmount" 
+            min="1" 
+            max="2000"
+            class="custom-input">
+          <span class="unit">ml</span>
+          <button 
+            class="add-btn"
+            (click)="logWaterIntake(customAmount)"
+            [disabled]="customAmount <= 0">
+            Add
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reminders Section -->
+    <div class="reminders-section" *ngIf="isNotificationSupported()">
+      <h3>Hydration Reminders</h3>
+      <div class="reminder-toggle">
+        <label class="toggle-switch">
+          <input 
+            type="checkbox" 
+            [(ngModel)]="isRemindersEnabled"
+            (change)="toggleReminders()">
+          <span class="toggle-slider"></span>
+        </label>
+        <div class="toggle-text">
+          <span class="toggle-label">
+            {{ isRemindersEnabled ? 'Reminders On' : 'Reminders Off' }}
+          </span>
+          <small *ngIf="isRemindersEnabled && currentUser" class="toggle-info">
+            Every {{ currentUser.reminderInterval }} minutes
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Intake History -->
+    <div class="history-section" *ngIf="recentIntakes.length > 0">
+      <h3>Today's Intake History</h3>
+      <div class="intake-list">
+        <div 
+          *ngFor="let intake of recentIntakes" 
+          class="intake-item">
+          <div class="intake-info">
+            <span class="intake-amount">{{ intake.amount }}ml</span>
+            <span class="intake-time">{{ formatTime(intake.timestamp) }}</span>
+          </div>
+          <button 
+            class="delete-btn"
+            (click)="deleteIntake(intake)"
+            title="Delete this entry">
+            ×
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Profile Warning -->
+    <div class="no-profile-warning" *ngIf="!currentUser">
+      <div class="warning-content">
+        <h3>🎯 Set Up Your Profile</h3>
+        <p>To get personalized hydration recommendations and track your progress, please set up your profile first.</p>
+        <a routerLink="/calculator" class="setup-btn">Calculate My Hydration Needs</a>
+      </div>
+    </div>
+
+    <!-- Notification Not Supported Warning -->
+    <div class="notification-warning" *ngIf="!isNotificationSupported()">
+      <div class="warning-content">
+        <h4>⚠️ Notifications Not Supported</h4>
+        <p>Your browser doesn't support notifications. Reminders won't work, but you can still track your water intake manually.</p>
+      </div>
+    </div>
+  </div>
+</div>

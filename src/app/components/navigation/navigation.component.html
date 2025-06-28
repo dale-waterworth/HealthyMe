@@ -1,0 +1,39 @@
+<nav class="navigation">
+  <div class="nav-container">
+    <div class="nav-brand">
+      <a routerLink="/" class="brand-link">
+        <span class="brand-icon">💧</span>
+        <span class="brand-text">HealthyMe</span>
+      </a>
+    </div>
+
+    <div class="nav-menu" [class.active]="isMenuOpen">
+      <a 
+        routerLink="/tracker" 
+        routerLinkActive="active"
+        class="nav-link"
+        (click)="closeMenu()">
+        <span class="nav-icon">📊</span>
+        <span>Tracker</span>
+      </a>
+      
+      <a 
+        routerLink="/calculator" 
+        routerLinkActive="active"
+        class="nav-link"
+        (click)="closeMenu()">
+        <span class="nav-icon">🧮</span>
+        <span>Calculator</span>
+      </a>
+    </div>
+
+    <button 
+      class="menu-toggle"
+      (click)="toggleMenu()"
+      [class.active]="isMenuOpen">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+</nav>
