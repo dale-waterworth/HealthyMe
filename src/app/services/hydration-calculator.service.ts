@@ -16,6 +16,8 @@ export interface HydrationResult {
   climateAdjustment: number; // in ml
   recommendedGlasses: number; // 250ml glasses
   recommendedInterval: number; // minutes between drinks
+  additionalForClimate?: number; // additional ml suggested for hot/humid weather
+  additionalForExercise?: number; // additional ml suggested for high activity days
 }
 
 @Injectable({
@@ -26,42 +28,43 @@ export class HydrationCalculatorService {
   constructor() { }
 
   calculateDailyWaterNeed(factors: HydrationFactors): HydrationResult {
-    // Base calculation: 35ml per kg of body weight (WHO recommendation)
-    const baseRequirement = factors.weight * 35;
+    // Base calculation: More conservative approach based on NHS guidelines
+    // Start with 30ml per kg instead of 35ml to prevent over-recommendation
+    const baseRequirement = factors.weight * 30;
 
-    // Age adjustments
+    // Age adjustments - reduced percentages
     let ageAdjustment = 0;
     if (factors.age >= 65) {
-      // Older adults need more due to decreased kidney function and thirst sensation
-      ageAdjustment = baseRequirement * 0.1; // 10% increase
+      // Older adults need slightly more due to decreased kidney function
+      ageAdjustment = baseRequirement * 0.05; // 5% increase (reduced from 10%)
     } else if (factors.age < 18) {
       // Children and teenagers have higher metabolic rates
-      ageAdjustment = baseRequirement * 0.15; // 15% increase
+      ageAdjustment = baseRequirement * 0.1; // 10% increase (reduced from 15%)
     }
 
-    // Activity level adjustments
+    // Activity level adjustments - reduced amounts
     let activityBonus = 0;
     switch (factors.activityLevel) {
       case 'low':
         activityBonus = 0;
         break;
       case 'moderate':
-        activityBonus = 500; // Additional 500ml for moderate activity
+        activityBonus = 300; // Reduced from 500ml
         break;
       case 'high':
-        activityBonus = 1000; // Additional 1000ml for high activity
+        activityBonus = 500; // Reduced from 1000ml
         break;
     }
 
-    // Climate adjustments
+    // Climate adjustments - these will be suggested as additional, not added to base
     let climateAdjustment = 0;
     if (factors.climate) {
       switch (factors.climate) {
         case 'hot':
-          climateAdjustment = 500; // Additional 500ml for hot weather
+          climateAdjustment = 300; // Reduced from 500ml
           break;
         case 'humid':
-          climateAdjustment = 300; // Additional 300ml for humid conditions
+          climateAdjustment = 200; // Reduced from 300ml
           break;
         case 'normal':
         default:
@@ -70,8 +73,12 @@ export class HydrationCalculatorService {
       }
     }
 
-    // Calculate total daily water goal
-    const dailyWaterGoal = Math.round(baseRequirement + ageAdjustment + activityBonus + climateAdjustment);
+    // Calculate base daily water goal (without climate adjustments)
+    const baseDailyGoal = Math.round(baseRequirement + ageAdjustment + activityBonus);
+    
+    // Apply maximum limit of 3000ml (3 litres) for the base recommendation
+    const maxBaseRecommendation = 3000;
+    const dailyWaterGoal = Math.min(baseDailyGoal, maxBaseRecommendation);
 
     // Convert to 250ml glasses (standard glass size)
     const recommendedGlasses = Math.ceil(dailyWaterGoal / 250);
@@ -81,6 +88,10 @@ export class HydrationCalculatorService {
     const totalIntakes = Math.max(6, Math.ceil(dailyWaterGoal / 200)); // At least 6 intakes, or 200ml per intake
     const recommendedInterval = Math.round((wakingHours * 60) / totalIntakes);
 
+    // Calculate additional recommendations for climate and exercise
+    const additionalForClimate = factors.climate && factors.climate !== 'normal' ? climateAdjustment : undefined;
+    const additionalForExercise = factors.activityLevel === 'high' ? 300 : undefined; // Extra for intense exercise days
+
     return {
       dailyWaterGoal,
       baseRequirement: Math.round(baseRequirement),
@@ -88,7 +99,9 @@ export class HydrationCalculatorService {
       ageAdjustment: Math.round(ageAdjustment),
       climateAdjustment,
       recommendedGlasses,
-      recommendedInterval
+      recommendedInterval,
+      additionalForClimate,
+      additionalForExercise
     };
   }
 
@@ -137,11 +150,13 @@ export class HydrationCalculatorService {
     // Activity-specific tips
     switch (factors.activityLevel) {
       case 'high':
-        tips.push('Drink water before, during, and after exercise');
-        tips.push('Consider electrolyte replacement for intense activities over 1 hour');
+        tips.push('Drink an extra 300-500ml before, during, and after intense exercise');
+        tips.push('Consider electrolyte replacement for activities over 1 hour');
+        tips.push('Monitor your sweat rate to adjust intake on heavy exercise days');
         break;
       case 'moderate':
-        tips.push('Increase intake on days with more physical activity');
+        tips.push('Add an extra 200-300ml on days with more physical activity');
+        tips.push('Drink water 30 minutes before moderate exercise');
         break;
       case 'low':
         tips.push('Use regular meal times as reminders to drink water');
@@ -150,10 +165,12 @@ export class HydrationCalculatorService {
 
     // Climate-specific tips
     if (factors.climate === 'hot') {
-      tips.push('Increase intake during hot weather to prevent heat exhaustion');
+      tips.push('Add an extra 300ml during hot weather to prevent heat exhaustion');
       tips.push('Drink cool (not ice-cold) water for better absorption');
+      tips.push('Start hydrating early in hot days, before you feel thirsty');
     } else if (factors.climate === 'humid') {
-      tips.push('Humid conditions increase fluid loss through perspiration');
+      tips.push('Add an extra 200ml on humid days due to increased perspiration');
+      tips.push('Pay attention to your body\'s cooling needs in humid conditions');
     }
 
     // General NHS-based tips

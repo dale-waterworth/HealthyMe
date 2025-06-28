@@ -44,10 +44,10 @@
       
       <div class="quick-amounts">
         <button 
-          *ngFor="let amount of quickAmounts"
+          *ngFor="let item of quickAmounts"
           class="quick-btn"
-          (click)="logWaterIntake(amount)">
-          {{ amount }}ml
+          (click)="logWaterIntake(item.amount)">
+          {{ item.label }} ({{ item.amount }}ml)
         </button>
       </div>
 

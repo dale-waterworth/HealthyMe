@@ -16,7 +16,12 @@ export class WaterTrackerComponent implements OnInit {
   currentUser: UserProfile | null = null;
   todayIntake = 0;
   dailyGoal = 2000;
-  quickAmounts = [250, 500, 330, 750];
+  quickAmounts = [
+    { label: '1 swig', amount: 50 },
+    { label: '2 swigs', amount: 100 },
+    { label: '1 glass', amount: 250 },
+    { label: '1 pint', amount: 568 }
+  ];
   customAmount = 250;
   recentIntakes: WaterIntake[] = [];
   progressPercentage = 0;
