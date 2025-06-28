@@ -122,7 +122,7 @@ export class NotificationService {
     );
   }
 
-  private showNotification(title: string, body: string, options: NotificationOptions = {}): void {
+  showNotification(title: string, body: string, options: NotificationOptions = {}): void {
     if (this.notificationPermission !== 'granted') {
       return;
     }

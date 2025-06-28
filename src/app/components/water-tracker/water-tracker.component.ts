@@ -109,10 +109,31 @@ export class WaterTrackerComponent implements OnInit {
   }
 
   async deleteIntake(intake: WaterIntake) {
-    // Note: IndexedDB service doesn't have delete method yet
-    // For now, we'll just reload the data
-    // TODO: Add delete method to IndexedDB service
-    console.log('Delete functionality not implemented yet');
+    if (!this.currentUser) return;
+
+    // Show confirmation dialog
+    const confirmed = confirm(`Delete ${intake.amount}ml entry from ${this.formatTime(intake.timestamp)}?`);
+    if (!confirmed) return;
+
+    try {
+      await this.dbService.deleteWaterIntake(intake.id);
+      
+      // Update local data
+      this.todayIntake -= intake.amount;
+      await this.loadRecentIntakes();
+      this.calculateProgress();
+
+      // Show success notification
+      this.notificationService.showNotification(
+        'Entry Deleted',
+        `Removed ${intake.amount}ml from your daily intake.`,
+        { icon: '/icons/icon-192x192.png', tag: 'water-deleted' }
+      );
+
+    } catch (error) {
+      console.error('Error deleting water intake:', error);
+      alert('Error deleting entry. Please try again.');
+    }
   }
 
   async toggleReminders() {

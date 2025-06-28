@@ -200,6 +200,19 @@ export class IndexedDBService {
     return intakes.reduce((total, intake) => total + intake.amount, 0);
   }
 
+  async deleteWaterIntake(id: number): Promise<void> {
+    if (!this.db) await this.initDatabase();
+
+    return new Promise((resolve, reject) => {
+      const transaction = this.db!.transaction(['waterIntakes'], 'readwrite');
+      const store = transaction.objectStore('waterIntakes');
+      const request = store.delete(id);
+
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
   // Hydration Reminder methods
   async saveHydrationReminder(reminder: Omit<HydrationReminder, 'id'>): Promise<number> {
     if (!this.db) await this.initDatabase();
