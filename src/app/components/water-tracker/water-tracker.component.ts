@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { IndexedDBService, UserProfile, WaterIntake } from '../../services/indexeddb.service';
 import { NotificationService } from '../../services/notification.service';
 
@@ -27,7 +27,8 @@ export class WaterTrackerComponent implements OnInit {
 
   constructor(
     private dbService: IndexedDBService,
-    private notificationService: NotificationService
+    private notificationService: NotificationService,
+    private router: Router
   ) {}
 
   async ngOnInit() {
@@ -52,8 +53,10 @@ export class WaterTrackerComponent implements OnInit {
         this.currentUser = profiles[0];
         this.dailyGoal = this.currentUser.dailyWaterGoal;
       }
+      // If no profile exists, currentUser remains null and the template will show the warning
     } catch (error) {
       console.error('Error loading user profile:', error);
+      // On error, currentUser remains null and the template will show the warning
     }
   }
 

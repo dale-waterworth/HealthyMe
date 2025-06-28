@@ -39,7 +39,7 @@
     </div>
 
     <!-- Quick Log Section -->
-    <div class="quick-log-section">
+    <div class="quick-log-section" *ngIf="currentUser">
       <h3>Log Water Intake</h3>
       
       <div class="quick-amounts">
@@ -73,7 +73,7 @@
     </div>
 
     <!-- Reminders Section -->
-    <div class="reminders-section" *ngIf="isNotificationSupported()">
+    <div class="reminders-section" *ngIf="isNotificationSupported() && currentUser">
       <h3>Hydration Reminders</h3>
       <div class="reminder-toggle">
         <label class="toggle-switch">
