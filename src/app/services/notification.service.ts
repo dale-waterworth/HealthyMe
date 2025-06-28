@@ -37,13 +37,13 @@ export class NotificationService {
       this.notificationPermission = permission;
       return permission === 'granted';
     } catch (error) {
-      console.error('Error requesting notification permission:', error);
       return false;
     }
   }
 
   async scheduleHydrationReminders(userId: number, intervalMinutes: number): Promise<boolean> {
     const hasPermission = await this.requestNotificationPermission();
+
     if (!hasPermission) {
       return false;
     }
@@ -76,17 +76,16 @@ export class NotificationService {
 
       // Start the reminder interval
       this.startReminderInterval(intervalMinutes);
-      
+
       // Show confirmation notification
       this.showNotification(
-        'Hydration Reminders Set!', 
+        'Hydration Reminders Set!',
         `You'll receive reminders every ${intervalMinutes} minutes to drink water.`,
         { icon: '/icons/icon-192x192.png' }
       );
 
       return true;
     } catch (error) {
-      console.error('Error saving reminder settings:', error);
       return false;
     }
   }
@@ -108,14 +107,14 @@ export class NotificationService {
     ];
 
     const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-    
+
     this.showNotification(
       'Hydration Reminder',
       randomMessage,
       {
         icon: '/icons/icon-192x192.png',
         badge: '/icons/icon-72x72.png',
-        tag: 'hydration-reminder',
+        tag: `hydration-reminder-${Date.now()}`,
         requireInteraction: false,
         silent: false
       }
@@ -123,7 +122,11 @@ export class NotificationService {
   }
 
   showNotification(title: string, body: string, options: NotificationOptions = {}): void {
-    if (this.notificationPermission !== 'granted') {
+    // Always check the current permission state
+    const currentPermission = Notification.permission;
+    this.notificationPermission = currentPermission;
+
+    if (currentPermission !== 'granted') {
       return;
     }
 
@@ -133,16 +136,22 @@ export class NotificationService {
       tag: 'healthyme-notification'
     };
 
-    const notification = new Notification(title, { ...defaultOptions, ...options });
+    try {
+      const notification = new Notification(title, { ...defaultOptions, ...options });
 
-    // Auto-close notification after 5 seconds
-    setTimeout(() => notification.close(), 5000);
+      // Auto-close notification after 5 seconds
+      setTimeout(() => {
+        notification.close();
+      }, 5000);
 
-    // Handle notification click
-    notification.onclick = () => {
-      window.focus();
-      notification.close();
-    };
+      // Handle notification click
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
+    } catch (error: any) {
+      // Silently fail if notifications don't work
+    }
   }
 
   async disableReminders(userId: number): Promise<void> {
@@ -156,7 +165,7 @@ export class NotificationService {
         });
       }
     } catch (error) {
-      console.error('Error disabling reminders:', error);
+      // Silently handle error
     }
   }
 
@@ -177,7 +186,7 @@ export class NotificationService {
         }
       }
     } catch (error) {
-      console.error('Error restoring reminders:', error);
+      // Silently handle error
     }
   }
 
@@ -222,5 +231,13 @@ export class NotificationService {
         requireInteraction: true
       }
     );
+  }
+
+  // Test method for debugging
+  async testNotification(): Promise<void> {
+    const hasPermission = await this.requestNotificationPermission();
+    if (hasPermission) {
+      this.showNotification('Test Notification', 'This is a test notification to verify functionality');
+    }
   }
 }
