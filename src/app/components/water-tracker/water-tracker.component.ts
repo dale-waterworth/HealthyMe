@@ -134,7 +134,7 @@ export class WaterTrackerComponent implements OnInit {
       this.notificationService.showNotification(
         'Entry Deleted',
         `Removed ${intake.amount}ml from your daily intake.`,
-        { icon: '/icons/icon-192x192.png', tag: 'water-deleted' }
+        { icon: '/assets/icon-192x192.png', tag: 'water-deleted' }
       );
 
     } catch (error) {

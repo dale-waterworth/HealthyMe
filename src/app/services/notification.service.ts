@@ -68,8 +68,8 @@ export class NotificationService {
       'Hydration Reminder',
       randomMessage,
       {
-        icon: '/icons/icon-192x192.png',
-        badge: '/icons/icon-72x72.png',
+        icon: '/assets/icon-192x192.png',
+        badge: '/assets/icon-72x72.png',
         tag: `hydration-reminder-${Date.now()}`,
         requireInteraction: false,
         silent: false
@@ -87,8 +87,8 @@ export class NotificationService {
     }
 
     const defaultOptions: NotificationOptions = {
-      icon: '/icons/icon-192x192.png',
-      badge: '/icons/icon-72x72.png',
+      icon: '/assets/icon-192x192.png',
+      badge: '/assets/icon-72x72.png',
       tag: 'healthyme-notification'
     };
 
@@ -161,7 +161,7 @@ export class NotificationService {
       'Water Intake Logged',
       message,
       {
-        icon: '/icons/icon-192x192.png',
+        icon: '/assets/icon-192x192.png',
         tag: 'water-logged'
       }
     );
@@ -173,7 +173,7 @@ export class NotificationService {
       '🏆 Achievement Unlocked!',
       achievement,
       {
-        icon: '/icons/icon-192x192.png',
+        icon: '/assets/icon-192x192.png',
         tag: 'achievement',
         requireInteraction: true
       }
