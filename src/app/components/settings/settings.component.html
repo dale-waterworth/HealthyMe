@@ -149,6 +149,65 @@
         </div>
       </div>
 
+      <!-- Notification Schedule -->
+      <div class="setting-section" *ngIf="reminderEnabled && currentUser">
+        <h3>📅 Today's Reminder Schedule</h3>
+        <p class="section-description">
+          Here's when you'll receive notifications and how much water you should have consumed by each time.
+        </p>
+        
+        <div class="schedule-container" *ngIf="getNotificationSchedule().length > 0">
+          <div class="schedule-summary">
+            <div class="summary-item">
+              <span class="summary-label">Total Reminders:</span>
+              <span class="summary-value">{{ getNotificationSchedule().length }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Target by End:</span>
+              <span class="summary-value">{{ getTotalScheduledIntake() }}ml</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Daily Goal:</span>
+              <span class="summary-value">{{ currentUser.dailyWaterGoal }}ml</span>
+            </div>
+          </div>
+
+          <div class="schedule-list">
+            <div class="schedule-header">
+              <span class="schedule-col-time">Time</span>
+              <span class="schedule-col-target">Target Intake</span>
+              <span class="schedule-col-progress">Progress</span>
+            </div>
+            
+            <div 
+              *ngFor="let item of getNotificationSchedule(); let i = index" 
+              class="schedule-item"
+              [class.first]="i === 0"
+              [class.last]="i === getNotificationSchedule().length - 1">
+              <span class="schedule-time">{{ item.time }}</span>
+              <span class="schedule-target">{{ item.targetIntake }}ml</span>
+              <div class="schedule-progress">
+                <div class="progress-bar-container">
+                  <div 
+                    class="progress-bar-fill" 
+                    [style.width.%]="item.percentage">
+                  </div>
+                </div>
+                <span class="progress-text">{{ item.percentage }}%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="schedule-note">
+            <p><strong>💡 Note:</strong> Smart reminders may skip notifications if you've already consumed more water than expected. The schedule shows ideal target amounts evenly distributed throughout your active hours.</p>
+          </div>
+        </div>
+
+        <div class="no-schedule" *ngIf="getNotificationSchedule().length === 0">
+          <p>No notifications scheduled. Please enable reminders and set your notification hours.</p>
+        </div>
+      </div>
+
       <!-- Test Section -->
       <div class="setting-section">
         <h3>Test Notifications</h3>

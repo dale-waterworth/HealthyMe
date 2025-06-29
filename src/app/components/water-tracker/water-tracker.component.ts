@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
-import { IndexedDBService, UserProfile, WaterIntake } from '../../services/indexeddb.service';
+import { IndexedDBService, UserProfile, WaterIntake, HydrationReminder } from '../../services/indexeddb.service';
 import { NotificationService } from '../../services/notification.service';
 
 @Component({
@@ -26,6 +26,7 @@ export class WaterTrackerComponent implements OnInit {
   recentIntakes: WaterIntake[] = [];
   progressPercentage = 0;
   remainingAmount = 0;
+  reminderSettings: HydrationReminder | null = null;
 
   constructor(
     private dbService: IndexedDBService,
@@ -37,6 +38,7 @@ export class WaterTrackerComponent implements OnInit {
     await this.loadUserProfile();
     await this.loadTodayIntake();
     await this.loadRecentIntakes();
+    await this.loadReminderSettings();
     this.calculateProgress();
   }
 

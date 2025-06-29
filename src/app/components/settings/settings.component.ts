@@ -18,7 +18,7 @@ export class SettingsComponent implements OnInit {
   
   // Form data
   reminderEnabled = false;
-  intervalType: 'half-hour' | 'hourly' | 'four-hour' = 'hourly';
+  intervalType: 'half-hour' | 'hourly' | 'four-hour' = 'half-hour';
   startHour = 8;
   endHour = 18;
   
@@ -319,5 +319,62 @@ export class SettingsComponent implements OnInit {
 
   async testNotification() {
     await this.notificationService.testNotification();
+  }
+
+  getNotificationSchedule(): Array<{time: string, targetIntake: number, percentage: number}> {
+    if (!this.currentUser || !this.reminderEnabled) return [];
+
+    const schedule = [];
+    const dailyGoal = this.currentUser.dailyWaterGoal;
+    const hoursPerDay = this.endHour - this.startHour;
+    
+    // Calculate interval in minutes
+    let intervalMinutes: number;
+    switch (this.intervalType) {
+      case 'half-hour':
+        intervalMinutes = 30;
+        break;
+      case 'hourly':
+        intervalMinutes = 60;
+        break;
+      case 'four-hour':
+        intervalMinutes = 240;
+        break;
+    }
+
+    // Calculate how many intervals we have in a day
+    const totalMinutesPerDay = hoursPerDay * 60;
+    const intervalsPerDay = Math.floor(totalMinutesPerDay / intervalMinutes);
+    const intakePerInterval = dailyGoal / intervalsPerDay;
+
+    // Generate schedule for the day
+    for (let i = 1; i <= intervalsPerDay; i++) {
+      const totalMinutesFromStart = i * intervalMinutes;
+      const hours = Math.floor(totalMinutesFromStart / 60);
+      const minutes = totalMinutesFromStart % 60;
+      
+      const notificationHour = this.startHour + hours;
+      const notificationMinute = minutes;
+      
+      // Skip if we go beyond end hour
+      if (notificationHour >= this.endHour) break;
+      
+      const timeString = `${notificationHour.toString().padStart(2, '0')}:${notificationMinute.toString().padStart(2, '0')}`;
+      const targetIntake = Math.round(intakePerInterval * i);
+      const percentage = Math.round((targetIntake / dailyGoal) * 100);
+      
+      schedule.push({
+        time: timeString,
+        targetIntake: targetIntake,
+        percentage: percentage
+      });
+    }
+
+    return schedule;
+  }
+
+  getTotalScheduledIntake(): number {
+    const schedule = this.getNotificationSchedule();
+    return schedule.length > 0 ? schedule[schedule.length - 1].targetIntake : 0;
   }
 }
