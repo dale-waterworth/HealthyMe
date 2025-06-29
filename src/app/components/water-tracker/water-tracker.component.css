@@ -457,6 +457,26 @@ input:checked + .toggle-slider:before {
     align-items: flex-start;
     gap: 10px;
   }
+
+  .schedule-time-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .schedule-item {
+    padding: 15px;
+  }
+
+  .progress-indicator {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .progress-percentage {
+    text-align: center;
+  }
 }
 
 @media (max-width: 480px) {
@@ -476,6 +496,233 @@ input:checked + .toggle-slider:before {
   .quick-amounts {
     grid-template-columns: 1fr 1fr;
   }
+}
+
+/* Drinking Schedule Section */
+.drinking-schedule-section {
+  margin-bottom: 30px;
+  padding: 25px;
+  background: #f0f8ff;
+  border-radius: 12px;
+  border-left: 4px solid #2196F3;
+}
+
+.drinking-schedule-section h3 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.schedule-description {
+  color: #666;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+}
+
+.schedule-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.schedule-item {
+  background: white;
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  border-left: 3px solid #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+.schedule-item.completed {
+  border-left-color: #4CAF50;
+  background: #f8fff8;
+}
+
+.schedule-item.current {
+  border-left-color: #FF9800;
+  background: #fff8f0;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.2);
+}
+
+.schedule-item.upcoming {
+  border-left-color: #2196F3;
+}
+
+.schedule-line-1 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  gap: 8px;
+}
+
+.schedule-line-2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.schedule-time {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  font-family: monospace;
+  min-width: 42px;
+}
+
+.schedule-status {
+  font-size: 0.9rem;
+  font-weight: 500;
+  min-width: 16px;
+}
+
+.status-completed {
+  color: #4CAF50;
+}
+
+.status-current {
+  color: #FF9800;
+}
+
+.status-upcoming {
+  color: #2196F3;
+}
+
+.target-amount {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2196F3;
+  flex: 1;
+}
+
+.progress-indicator {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-bar-small {
+  flex: 1;
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill-small {
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50, #2196F3);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progress-percentage {
+  font-size: 0.8rem;
+  color: #666;
+  white-space: nowrap;
+  min-width: 65px;
+}
+
+.schedule-action {
+  display: flex;
+  justify-content: center;
+}
+
+.drink-btn {
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #2196F3, #1976D2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.drink-btn:hover {
+  background: linear-gradient(135deg, #1976D2, #1565C0);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.drink-btn.current-btn {
+  background: linear-gradient(135deg, #FF9800, #F57C00);
+  animation: pulse 2s infinite;
+}
+
+.drink-btn.current-btn:hover {
+  background: linear-gradient(135deg, #F57C00, #E65100);
+}
+
+.drink-btn-compact {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #2196F3, #1976D2);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.drink-btn-compact:hover {
+  background: linear-gradient(135deg, #1976D2, #1565C0);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}
+
+.drink-btn-compact.current-btn {
+  background: linear-gradient(135deg, #FF9800, #F57C00);
+  animation: pulse 2s infinite;
+}
+
+.drink-btn-compact.current-btn:hover {
+  background: linear-gradient(135deg, #F57C00, #E65100);
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 6px 20px rgba(255, 152, 0, 0.5);
+  }
+  100% {
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+  }
+}
+
+.schedule-completed {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.completed-message {
+  color: #4CAF50;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.schedule-summary {
+  margin-top: 20px;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  border-left: 4px solid #4CAF50;
+}
+
+.schedule-summary p {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 /* Settings Section */

@@ -72,6 +72,59 @@
       </div>
     </div>
 
+    <!-- Drinking Schedule -->
+    <div class="drinking-schedule-section" *ngIf="currentUser && hasActiveSchedule()">
+      <h3>📅 Today's Drinking Schedule</h3>
+      <p class="schedule-description">
+        Follow your personalized hydration schedule. Click the buttons to log when you drink the recommended amounts.
+      </p>
+      
+      <div class="schedule-container">
+        <div 
+          *ngFor="let item of getDrinkingSchedule(); let i = index" 
+          class="schedule-item"
+          [class.completed]="item.status === 'completed'"
+          [class.current]="item.status === 'current'"
+          [class.upcoming]="item.status === 'upcoming'">
+          
+          <div class="schedule-line-1">
+            <span class="schedule-time">{{ item.time }}</span>
+            <span class="schedule-status" [ngSwitch]="item.status">
+              <span *ngSwitchCase="'completed'" class="status-completed">✓</span>
+              <span *ngSwitchCase="'current'" class="status-current">⏰</span>
+              <span *ngSwitchCase="'upcoming'" class="status-upcoming">⏳</span>
+            </span>
+            <span class="target-amount">{{ item.targetIntake }}ml target</span>
+            <span class="progress-percentage">{{ item.percentage }}% daily</span>
+          </div>
+          
+          <div class="schedule-line-2">
+            <div class="progress-bar-small">
+              <div 
+                class="progress-fill-small" 
+                [style.width.%]="getProgressWidth(item.targetIntake)">
+              </div>
+            </div>
+            <div class="schedule-action" *ngIf="item.recommendedAmount > 0 && item.status !== 'completed'">
+              <button 
+                class="drink-btn-compact"
+                [class.current-btn]="item.status === 'current'"
+                (click)="logScheduledAmount(item)">
+                Drink {{ item.recommendedAmount }}ml
+              </button>
+            </div>
+            <div class="schedule-completed" *ngIf="item.status === 'completed'">
+              <span class="completed-message">🎯 Done!</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="schedule-summary">
+        <p><strong>💡 Tip:</strong> Stay on track by drinking the recommended amounts at each scheduled time. Your progress updates automatically!</p>
+      </div>
+    </div>
+
     <!-- Settings Link -->
     <div class="settings-section" *ngIf="currentUser">
       <h3>Reminders & Settings</h3>

@@ -188,4 +188,154 @@ export class WaterTrackerComponent implements OnInit {
     return this.notificationService.isNotificationSupported();
   }
 
+  async loadReminderSettings() {
+    if (!this.currentUser) return;
+
+    try {
+      this.reminderSettings = await this.dbService.getHydrationReminderByUser(this.currentUser.id);
+    } catch (error) {
+      console.error('Error loading reminder settings:', error);
+    }
+  }
+
+  getDrinkingSchedule(): Array<{time: string, targetIntake: number, percentage: number, status: 'completed' | 'current' | 'upcoming', recommendedAmount: number}> {
+    if (!this.currentUser) {
+      return [];
+    }
+    
+    if (!this.reminderSettings || !this.reminderSettings.isEnabled) {
+      return this.getDefaultSchedule();
+    }
+
+    const schedule = [];
+    const hoursPerDay = this.reminderSettings.endHour - this.reminderSettings.startHour;
+    
+    // Calculate interval in minutes
+    let intervalMinutes: number;
+    switch (this.reminderSettings.intervalType) {
+      case 'half-hour':
+        intervalMinutes = 30;
+        break;
+      case 'hourly':
+        intervalMinutes = 60;
+        break;
+      case 'four-hour':
+        intervalMinutes = 240;
+        break;
+    }
+
+    // Calculate how many intervals we have in a day
+    const totalMinutesPerDay = hoursPerDay * 60;
+    const intervalsPerDay = Math.floor(totalMinutesPerDay / intervalMinutes);
+    const intakePerInterval = this.dailyGoal / intervalsPerDay;
+
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+
+    // Generate schedule for the day
+    for (let i = 1; i <= intervalsPerDay; i++) {
+      const totalMinutesFromStart = i * intervalMinutes;
+      const hours = Math.floor(totalMinutesFromStart / 60);
+      const minutes = totalMinutesFromStart % 60;
+      
+      const notificationHour = this.reminderSettings.startHour + hours;
+      const notificationMinute = minutes;
+      
+      // Skip if we go beyond end hour
+      if (notificationHour >= this.reminderSettings.endHour) break;
+      
+      const timeString = `${notificationHour.toString().padStart(2, '0')}:${notificationMinute.toString().padStart(2, '0')}`;
+      const targetIntake = Math.round(intakePerInterval * i);
+      const percentage = Math.round((targetIntake / this.dailyGoal) * 100);
+      
+      // Determine status
+      const scheduleTime = notificationHour * 60 + notificationMinute;
+      let status: 'completed' | 'current' | 'upcoming';
+      
+      if (this.todayIntake >= targetIntake) {
+        status = 'completed';
+      } else if (currentTime >= scheduleTime - 30 && currentTime <= scheduleTime + 30) {
+        status = 'current';
+      } else {
+        status = 'upcoming';
+      }
+
+      // Calculate recommended amount for this time
+      const remainingToTarget = Math.max(0, targetIntake - this.todayIntake);
+      const recommendedAmount = Math.min(remainingToTarget, Math.round(intakePerInterval));
+      
+      schedule.push({
+        time: timeString,
+        targetIntake: targetIntake,
+        percentage: percentage,
+        status: status,
+        recommendedAmount: recommendedAmount
+      });
+    }
+
+    return schedule;
+  }
+
+  getDefaultSchedule(): Array<{time: string, targetIntake: number, percentage: number, status: 'completed' | 'current' | 'upcoming', recommendedAmount: number}> {
+    // Default schedule every 2 hours from 8am to 6pm
+    const schedule = [];
+    const intervalsPerDay = 5; // 8am, 10am, 12pm, 2pm, 4pm, 6pm
+    const intakePerInterval = this.dailyGoal / intervalsPerDay;
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+
+    for (let i = 1; i <= intervalsPerDay; i++) {
+      const hour = 6 + (i * 2); // 8, 10, 12, 14, 16, 18
+      const timeString = `${hour.toString().padStart(2, '0')}:00`;
+      const targetIntake = Math.round(intakePerInterval * i);
+      const percentage = Math.round((targetIntake / this.dailyGoal) * 100);
+      
+      // Determine status
+      const scheduleTime = hour * 60;
+      let status: 'completed' | 'current' | 'upcoming';
+      
+      if (this.todayIntake >= targetIntake) {
+        status = 'completed';
+      } else if (currentTime >= scheduleTime - 60 && currentTime <= scheduleTime + 60) {
+        status = 'current';
+      } else {
+        status = 'upcoming';
+      }
+
+      // Calculate recommended amount for this time
+      const remainingToTarget = Math.max(0, targetIntake - this.todayIntake);
+      const recommendedAmount = Math.min(remainingToTarget, Math.round(intakePerInterval));
+      
+      schedule.push({
+        time: timeString,
+        targetIntake: targetIntake,
+        percentage: percentage,
+        status: status,
+        recommendedAmount: recommendedAmount
+      });
+    }
+
+    return schedule;
+  }
+
+  hasActiveSchedule(): boolean {
+    return this.getDrinkingSchedule().length > 0;
+  }
+
+  getCurrentScheduleItem(): any {
+    const schedule = this.getDrinkingSchedule();
+    return schedule.find(item => item.status === 'current') || 
+           schedule.find(item => item.status === 'upcoming' && item.recommendedAmount > 0);
+  }
+
+  async logScheduledAmount(scheduleItem: any) {
+    if (scheduleItem.recommendedAmount > 0) {
+      await this.logWaterIntake(scheduleItem.recommendedAmount);
+    }
+  }
+
+  getProgressWidth(targetIntake: number): number {
+    return Math.min(100, (this.todayIntake / targetIntake) * 100);
+  }
+
 }
